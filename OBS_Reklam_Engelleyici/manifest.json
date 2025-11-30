@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "OBS Reklam Engelleyici",
+  "version": "1.0",
+  "description": "İstanbul Üniversitesi OBS sistemindeki açılır reklamı otomatik kapatır.",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "OBS Reklam Engelleyici",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://obs.istanbul.edu.tr/*",
+        "https://aksis.istanbul.edu.tr/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
