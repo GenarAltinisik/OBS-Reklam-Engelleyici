@@ -1,35 +1,50 @@
-// Aradığımız butonun özelliklerini tam olarak buraya tanımlıyoruz
-// Hem "close" class'ı olan hem de "data-dismiss=modal" özelliği olan butonu arıyoruz.
-const butonSecicisi = 'button.close[data-dismiss="modal"]';
+// content.js - MutationObserver ile Profesyonel Versiyon
 
-function reklamiKapat() {
-    const kapatButonu = document.querySelector(butonSecicisi);
+console.log("OBS Reklam Engelleyici (Gözcü Modu) devrede...");
+
+// 1. ADIM: Gözlemciyi (Observer) Tanımlıyoruz
+const gozlemci = new MutationObserver((mutations) => {
     
-    // Eğer buton sayfada varsa ve görünürse
-    if (kapatButonu) {
-        console.log("Reklam kapatma butonu bulundu, tıklanıyor...");
-        kapatButonu.click(); // <--- SANKİ SEN BASMIŞSIN GİBİ TIKLAR
-        return true; // İşlem başarılı
+    // Sayfada her değişiklik olduğunda burası çalışır
+    // Ama merak etme, tarayıcı bunu çok hızlı yapar, yorulmaz.
+    
+    // HEDEF: Senin bulduğun o özel reklam ID'si
+    const reklamGorseli = document.getElementById('btnulusalstajprogrami');
+
+    if (reklamGorseli) {
+        // Reklam görselini bulduysak, onun içinde olduğu kutuyu (modal-body) bulalım
+        const kapsayiciKutu = reklamGorseli.closest('.modal-body');
+
+        if (kapsayiciKutu) {
+            // Kutunun içindeki kapatma (X) butonunu bul
+            const kapatButonu = kapsayiciKutu.querySelector('button.close');
+
+            if (kapatButonu) {
+                console.log("Reklam yakalandı! Kapatılıyor... 🔨");
+                kapatButonu.click();
+
+                // Eğer reklam sadece 1 kere çıkıyorsa, işimiz bitince gözlemciyi durdurabiliriz.
+                // Ama OBS içinde sayfa yenilenmeden dolaşılıyorsa durdurmamak daha iyi.
+                // gozlemci.disconnect(); // (İsteğe bağlı)
+            }
+        }
     }
-    return false; // Henüz bulunamadı
+});
+
+// 2. ADIM: Gözcüyü Göreve Başlatıyoruz
+// document.body: Sayfanın gövdesini izle
+// childList: true -> Yeni bir element eklenirse haber ver
+// subtree: true -> İç içe klasörler gibi en derinlerdeki değişiklikleri de izle
+gozlemci.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+// EKSTRA GÜVENLİK: 
+// Bazen script çalışmaya başladığında reklam çoktan yüklenmiş olabilir.
+// Gözlemci sadece "yeni" gelenleri görür. Mevcut durumu da bir kere kontrol edelim:
+const mevcutReklam = document.getElementById('btnulusalstajprogrami');
+if (mevcutReklam) {
+    const btn = mevcutReklam.closest('.modal-body')?.querySelector('button.close');
+    if (btn) btn.click();
 }
-
-// Sayfa açılır açılmaz hemen bir kere dene
-reklamiKapat();
-
-// Reklam sonradan (ajax ile) yükleniyorsa diye bir döngü kuralım.
-// Her yarım saniyede bir kontrol etsin.
-const zamanlayici = setInterval(() => {
-    const sonuc = reklamiKapat();
-    
-    // Eğer butonu bulup tıkladıysak artık döngüyü durdurabiliriz.
-    if (sonuc) {
-        clearInterval(zamanlayici);
-        console.log("Reklam kapatıldı, görev tamamlandı.");
-    }
-}, 500);
-
-// Ne olur ne olmaz, 10 saniye sonra aramayı bırak (bilgisayarı yormamak için)
-setTimeout(() => {
-    clearInterval(zamanlayici);
-}, 10000);
